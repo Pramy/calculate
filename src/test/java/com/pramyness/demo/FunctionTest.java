@@ -16,7 +16,12 @@ public class FunctionTest {
 
     @Test
     public void outputExercises() {
-        function.outputExercises(20,20);
+        function.outputExercises(50,20);
 
+    }
+
+    @Test
+    public void outputGrade() {
+        function.outputGrade("Exercises.txt","Answers.txt","Grade.txt");
     }
 }

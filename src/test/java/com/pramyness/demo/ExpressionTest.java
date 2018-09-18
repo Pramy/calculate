@@ -63,8 +63,19 @@ public class ExpressionTest {
 
     @Test
     public void build() {
-        Expression expression = new Expression("1/15 ÷ ( 6 ÷ ( 2 × 1'3/14 ) )");
-        System.out.println(expression);
+        Expression ex=new Expression(3,20);
+        Expression expression = new Expression(ex.toString());
+        System.out.println("----------------");
+        System.out.println(ex+" = "+ex.getResult());
+        System.out.println(expression+" = "+expression.getResult());
+        assert ex.equals(expression);
+    }
+
+    @Test
+    public void batchBuild() {
+        for (int i = 0; i < 20; i++) {
+            build();
+        }
     }
 
 

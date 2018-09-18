@@ -108,26 +108,23 @@ public class Expression implements Cloneable {
             if (!isSymbol(strings[i])) {
                 nodeStack.push(new Node(new Fraction(strings[i]), null, null, 1));
             } else {
-//                if (!symbolStack.isEmpty()) {
                 while (!symbolStack.isEmpty() && !tryPush(strings[i], symbolStack.peek())) {
                     String symbol = symbolStack.pop();
 
                     if (symbol.equals(LEFT_BRACKETS) && strings[i].equals(RIGHT_BRACKETS)) {
                         break;
                     }
-                    push(symbol,nodeStack);
+                    push(symbol, nodeStack);
 
                 }
                 //如果符号不是")"就进栈
                 if (!strings[i].equals(RIGHT_BRACKETS)) {
                     symbolStack.push(strings[i]);
                 }
-//                }
-//                symbolStack.push(strings[i]);
             }
         }
         while (!symbolStack.isEmpty()) {
-            push(symbolStack.pop(),nodeStack);
+            push(symbolStack.pop(), nodeStack);
         }
         return nodeStack.pop();
     }
@@ -146,7 +143,8 @@ public class Expression implements Cloneable {
 
 
     private boolean tryPush(String s, String target) {
-        return (isTwo(s) && isOne(target)) || s.equals(LEFT_BRACKETS);
+        return s.equals(LEFT_BRACKETS) || (isTwo(s) && isOne(target)) ||
+                (!s.equals(RIGHT_BRACKETS) && target.equals(LEFT_BRACKETS));
     }
 
     private boolean isSymbol(String s) {
@@ -156,11 +154,24 @@ public class Expression implements Cloneable {
 
 
     private Fraction createFraction(int bound) {
+        if (bound == 1) {
+            return new Fraction(0, 1);
+        }
         ThreadLocalRandom random = ThreadLocalRandom.current();
+        int b ;
         if (random.nextBoolean()) {
-            return new Fraction(random.nextInt(bound) + 1, 1);
+            return new Fraction(random.nextInt(bound), 1);
         } else {
-            return new Fraction(random.nextInt(bound) + 1, random.nextInt(bound) + 1);
+            if (random.nextBoolean()) {
+                b = random.nextInt(bound);
+                b = b == 0 ? 1 : b;
+                return new Fraction(random.nextInt(bound), b);
+            } else {
+                b = random.nextInt(bound);
+                b = b == 0 ? 1 : b;
+                int a = b == 1 ? 0 : random.nextInt(b);
+                return new Fraction(random.nextInt(bound) * b + a, b);
+            }
         }
     }
 
