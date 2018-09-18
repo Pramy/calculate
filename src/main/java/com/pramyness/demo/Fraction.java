@@ -11,7 +11,32 @@ public class Fraction {
 
     private int b;
 
+    public Fraction(String string) {
+        string = string.trim();
+
+        int a, b;
+        int cc = string.indexOf("'");
+        int bb = string.indexOf("/");
+        if (cc != -1) {
+
+            int c = Integer.valueOf(string.substring(0, cc));
+            b = Integer.valueOf(string.substring(bb + 1));
+            a = c * b + Integer.valueOf(string.substring(cc + 1, bb));
+        } else if (bb != -1) {
+            b = Integer.valueOf(string.substring(bb + 1));
+            a = Integer.valueOf(string.substring(0, bb));
+        } else {
+            a = Integer.valueOf(string);
+            b = 1;
+        }
+        adjust(a,b);
+    }
+
     public Fraction(int a, int b) {
+        adjust(a,b);
+    }
+
+    private void adjust(int a, int b) {
         if (b == 0) {
             throw new RuntimeException("分母不能为0");
         }
@@ -50,6 +75,7 @@ public class Fraction {
         this.a = Math.abs(this.a);
         this.b = Math.abs(this.b);
     }
+
     public boolean isNegative() {
         return a < 0;
     }

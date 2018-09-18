@@ -1,5 +1,7 @@
 package com.pramyness.demo;
 
+import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -16,6 +18,10 @@ public class Expression implements Cloneable {
     private static final String MULTIPLY = "×";
 
     private static final String DIVIDE = "÷";
+
+    private static final String LEFT_BRACKETS = "(";
+
+    private static final String RIGHT_BRACKETS = ")";
 
     private static final String[] SYMBOLS = {ADD, SUBTRACT, MULTIPLY, DIVIDE};
 
@@ -39,47 +45,8 @@ public class Expression implements Cloneable {
         }
     }
 
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        Expression expression = (Expression) super.clone();
-        if (expression.root != null) {
-            expression.root = (Node) expression.root.clone();
-        }
-        return expression;
-    }
-
-    @Override
-    public String toString() {
-        return print(root) + " = " + getResult();
-    }
-
-    public String getResult() {
-        if (root == null) {
-            return "";
-        } else {
-            return root.result.toString();
-        }
-    }
-
-    private String print(Node node) {
-        if (node == null) {
-            return "";
-        }
-        String left = print(node.left);
-
-        String mid = node.toString();
-        if (node.left instanceof SymbolNode && node instanceof SymbolNode) {
-            if (leftBrackets(((SymbolNode) node.left).symbol, ((SymbolNode) node).symbol)) {
-                left = "(" + left + ")";
-            }
-        }
-        String right = print(node.right);
-        if (node.right instanceof SymbolNode && node instanceof SymbolNode) {
-            if (rightBrackets(((SymbolNode) node.right).symbol, ((SymbolNode) node).symbol)) {
-                right = "(" + right + ")";
-            }
-        }
-        return left + mid + right;
+    public Expression(String expression) {
+        this.root = build(expression);
     }
 
     private boolean leftBrackets(String left, String mid) {
@@ -106,7 +73,6 @@ public class Expression implements Cloneable {
         if (root == null) {
             return;
         }
-//        System.out.printf(s + root.toString().trim()+" ,high:"+root.high);
         System.out.printf("%-15shigh:%d\n", s + root.toString().trim(), root.high);
         before(root.left, s + ">");
         before(root.right, s + ">");
@@ -134,6 +100,60 @@ public class Expression implements Cloneable {
         return parent;
     }
 
+    private Node build(String expression) {
+        String[] strings = expression.split(" ");
+        Stack<Node> nodeStack = new Stack<>();
+        Stack<String> symbolStack = new Stack<>();
+        for (int i = 0; i < strings.length; i++) {
+            if (!isSymbol(strings[i])) {
+                nodeStack.push(new Node(new Fraction(strings[i]), null, null, 1));
+            } else {
+//                if (!symbolStack.isEmpty()) {
+                while (!symbolStack.isEmpty() && !tryPush(strings[i], symbolStack.peek())) {
+                    String symbol = symbolStack.pop();
+
+                    if (symbol.equals(LEFT_BRACKETS) && strings[i].equals(RIGHT_BRACKETS)) {
+                        break;
+                    }
+                    push(symbol,nodeStack);
+
+                }
+                //如果符号不是")"就进栈
+                if (!strings[i].equals(RIGHT_BRACKETS)) {
+                    symbolStack.push(strings[i]);
+                }
+//                }
+//                symbolStack.push(strings[i]);
+            }
+        }
+        while (!symbolStack.isEmpty()) {
+            push(symbolStack.pop(),nodeStack);
+        }
+        return nodeStack.pop();
+    }
+
+    private void push(String symbol, Stack<Node> nodeStack) {
+
+        if (!symbol.equals(LEFT_BRACKETS)) {
+            Node right = nodeStack.pop();
+            Node left = nodeStack.pop();
+            SymbolNode node = new SymbolNode(right, left, symbol);
+            node.result = calculate(symbol, left.result, right.result);
+            node.high = Math.max(left.high, right.high) + 1;
+            nodeStack.push(node);
+        }
+    }
+
+
+    private boolean tryPush(String s, String target) {
+        return (isTwo(s) && isOne(target)) || s.equals(LEFT_BRACKETS);
+    }
+
+    private boolean isSymbol(String s) {
+        return s.equals(ADD) || s.equals(SUBTRACT) || s.equals(MULTIPLY) || s.equals(DIVIDE)
+                || s.equals(LEFT_BRACKETS) || s.equals(RIGHT_BRACKETS);
+    }
+
 
     private Fraction createFraction(int bound) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -155,6 +175,49 @@ public class Expression implements Cloneable {
             default:
                 return left.divide(right);
         }
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Expression expression = (Expression) super.clone();
+        if (expression.root != null) {
+            expression.root = (Node) expression.root.clone();
+        }
+        return expression;
+    }
+
+    @Override
+    public String toString() {
+        return print(root);
+    }
+
+    public String getResult() {
+        if (root == null) {
+            return "";
+        } else {
+            return root.result.toString();
+        }
+    }
+
+    private String print(Node node) {
+        if (node == null) {
+            return "";
+        }
+        String left = print(node.left);
+
+        String mid = node.toString();
+        if (node.left instanceof SymbolNode && node instanceof SymbolNode) {
+            if (leftBrackets(((SymbolNode) node.left).symbol, ((SymbolNode) node).symbol)) {
+                left = LEFT_BRACKETS + " " + left + " " + RIGHT_BRACKETS;
+            }
+        }
+        String right = print(node.right);
+        if (node.right instanceof SymbolNode && node instanceof SymbolNode) {
+            if (rightBrackets(((SymbolNode) node.right).symbol, ((SymbolNode) node).symbol)) {
+                right = LEFT_BRACKETS + " " + right + " " + RIGHT_BRACKETS;
+            }
+        }
+        return left + mid + right;
     }
 
     @Override
@@ -184,9 +247,9 @@ public class Expression implements Cloneable {
 
         Node left;
 
-        int high ;
+        int high;
 
-        Node(Fraction result, Node right, Node left,int high) {
+        Node(Fraction result, Node right, Node left, int high) {
             this.result = result;
             this.right = right;
             this.left = left;
@@ -238,7 +301,7 @@ public class Expression implements Cloneable {
         String symbol;
 
         SymbolNode(Node right, Node left, String symbol) {
-            super(null,right,left,0);
+            super(null, right, left, 0);
             this.symbol = symbol;
         }
 

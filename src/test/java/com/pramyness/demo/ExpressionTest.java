@@ -61,6 +61,13 @@ public class ExpressionTest {
         }
     }
 
+    @Test
+    public void build() {
+        Expression expression = new Expression("1/15 ÷ ( 6 ÷ ( 2 × 1'3/14 ) )");
+        System.out.println(expression);
+    }
+
+
     private void change(Expression expression) {
         Field field;
         try {
