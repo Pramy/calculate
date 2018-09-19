@@ -2,13 +2,19 @@ package com.pramyness.demo;
 
 
 /**
- * IntelliJ IDEA 17
+ * IntelliJ IDEA 18
  * Created by Pramy on 2018/9/16.
  */
 public class Fraction {
 
+    /**
+     * 分子
+     */
     private int a;
 
+    /**
+     * 分母
+     */
     private int b;
 
     public Fraction(String string) {
@@ -40,6 +46,7 @@ public class Fraction {
         if (b == 0) {
             throw new RuntimeException("分母不能为0");
         }
+        //记录负数的标志
         boolean isNegative = false;
         if ((a < 0 && b > 0) || (a > 0 && b < 0)) {
             isNegative = true;
@@ -47,35 +54,60 @@ public class Fraction {
         a = Math.abs(a);
         b = Math.abs(b);
         int c = gcd(a, b);
+        //保证只有a才会小于0
         this.a = isNegative ? -a / c : a / c;
         this.b = b / c;
     }
 
 
+    /**
+     * 加法 a + b
+     * @param fraction b
+     * @return a - b
+     */
     public Fraction add(Fraction fraction) {
         return new Fraction(this.a * fraction.b + fraction.a * this.b,
                 this.b * fraction.b);
     }
 
+    /**
+     * 减法 a - b
+     * @param fraction b
+     * @return a - b
+     */
     public Fraction subtract(Fraction fraction) {
         return new Fraction(this.a * fraction.b - fraction.a * this.b,
                 this.b * fraction.b);
     }
 
+    /** 乘法 a x b
+     * @param fraction b
+     * @return a x b
+     */
     public Fraction multiply(Fraction fraction) {
         return new Fraction(this.a * fraction.a,
                 this.b * fraction.b);
     }
 
+    /** 除法 a / b
+     * @param fraction b
+     * @return a / b
+     */
     public Fraction divide(Fraction fraction) {
         return new Fraction(this.a * fraction.b, b * fraction.a);
     }
 
+    /**
+     * 绝对值
+     */
     public void abs() {
         this.a = Math.abs(this.a);
         this.b = Math.abs(this.b);
     }
 
+    /**是否是负数
+     * @return a < 0
+     */
     public boolean isNegative() {
         return a < 0;
     }

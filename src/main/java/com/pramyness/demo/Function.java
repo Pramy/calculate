@@ -14,10 +14,10 @@ import java.util.Set;
 public class Function {
 
 
-    public void outputExercises(int bound) {
-        outputExercises(50, bound);
-    }
-
+    /**
+     * @param sum 符号数量
+     * @param bound 范围
+     */
     public void outputExercises(int sum, int bound) {
         if (bound <= 0 || sum <= 0) {
             throw new RuntimeException("bound or sun must greater than 0");
@@ -28,6 +28,7 @@ public class Function {
         ) {
             for (int i = 1; set.size()< sum;) {
                 try {
+                    //因为在运算的过程中会出现n÷0的情况，这时候就会抛异常
                     Expression expression = new Expression(3, bound);
                     if (!set.contains(expression)) {
                         exercisesWriter.write(i + "." + expression.toString() + "\n");
@@ -47,6 +48,12 @@ public class Function {
         }
     }
 
+    /**
+     * 输出结果
+     * @param exercisePath 表达式文件路径
+     * @param answerPath 结果文件路径
+     * @param gradePath 输出结果文件路径
+     */
     public void outputGrade(String exercisePath, String answerPath, String gradePath) {
         try (BufferedReader exReader = new BufferedReader(new FileReader(exercisePath));
              BufferedReader anReader = new BufferedReader(new FileReader(answerPath));
@@ -66,9 +73,15 @@ public class Function {
                     if (expression.getResult().equals(answer.toString())) {
                         c++;
                         correct.append(" ").append(i);
+                        if (c % 20 == 0) {
+                            correct.append("\n");
+                        }
                     } else {
                         w++;
                         wrong.append(" ").append(i);
+                        if (w % 20 == 0) {
+                            wrong.append("\n");
+                        }
                     }
                 }
             }

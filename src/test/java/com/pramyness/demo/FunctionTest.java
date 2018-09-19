@@ -16,7 +16,7 @@ public class FunctionTest {
 
     @Test
     public void outputExercises() {
-        function.outputExercises(50,20);
+        function.outputExercises(10000,20);
 
     }
 

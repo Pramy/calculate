@@ -57,18 +57,36 @@ public class Expression implements Cloneable {
         return !(isOne(mid) && isTwo(right));
     }
 
+    /**
+     * 是否是一元运算符
+     * @param s s
+     * @return boolean
+     */
     private boolean isOne(String s) {
         return s.equals(ADD) || s.equals(SUBTRACT);
     }
 
+    /**
+     * 是否是二元运算符
+     * @param s s
+     * @return boolean
+     */
     private boolean isTwo(String s) {
         return s.equals(MULTIPLY) || s.equals(DIVIDE);
     }
 
+    /**
+     * 前序遍历
+     */
     public void before() {
         before(root, "");
     }
 
+    /**
+     * 前序遍历
+     * @param root root
+     * @param s s
+     */
     private void before(Node root, String s) {
         if (root == null) {
             return;
@@ -78,17 +96,26 @@ public class Expression implements Cloneable {
         before(root.right, s + ">");
     }
 
+    /**
+     * 根据符号数来随机构造表达树
+     * @param sum 符号数
+     * @return node
+     */
     private Node build(int sum) {
+        //如果是0就构造叶子节点
         if (sum == 0) {
             return new Node(createFraction(bound), null, null, 1);
         }
         ThreadLocalRandom random = ThreadLocalRandom.current();
+        //1.否则就是构造符号节点
         final SymbolNode parent = new SymbolNode(null, null, SYMBOLS[random.nextInt(4)]);
         int left = random.nextInt(sum);
+        //2.递归下去构造左孩子和右孩子
         parent.left = build(left);
         parent.right = build(sum - left - 1);
+        //3.然后计算结果
         Fraction result = calculate(parent.symbol, parent.left.result, parent.right.result);
-
+        //4.如果是负数就取绝对值，然后交换左右孩子
         if (result.isNegative()) {
             Node tmp = parent.left;
             parent.left = parent.right;
@@ -96,39 +123,51 @@ public class Expression implements Cloneable {
             result.abs();
         }
         parent.result = result;
+        //5.计算树高
         parent.high = Math.max(parent.left.high, parent.right.high) + 1;
         return parent;
     }
 
+    /** 根据 string 表达式构建树
+     * @param expression 表达式
+     * @return node
+     */
     private Node build(String expression) {
         String[] strings = expression.split(" ");
         Stack<Node> nodeStack = new Stack<>();
         Stack<String> symbolStack = new Stack<>();
-        for (int i = 0; i < strings.length; i++) {
-            if (!isSymbol(strings[i])) {
-                nodeStack.push(new Node(new Fraction(strings[i]), null, null, 1));
+        for (String string : strings) {
+            //1.如果是数字就构建叶子节点并且进栈
+            if (!isSymbol(string)) {
+                nodeStack.push(new Node(new Fraction(string), null, null, 1));
             } else {
-                while (!symbolStack.isEmpty() && !tryPush(strings[i], symbolStack.peek())) {
+                //比较符号栈中的顶层符号如果需要出栈
+                while (!symbolStack.isEmpty() && !tryPush(string, symbolStack.peek())) {
                     String symbol = symbolStack.pop();
 
-                    if (symbol.equals(LEFT_BRACKETS) && strings[i].equals(RIGHT_BRACKETS)) {
+                    if (symbol.equals(LEFT_BRACKETS) && string.equals(RIGHT_BRACKETS)) {
                         break;
                     }
                     push(symbol, nodeStack);
 
                 }
                 //如果符号不是")"就进栈
-                if (!strings[i].equals(RIGHT_BRACKETS)) {
-                    symbolStack.push(strings[i]);
+                if (!string.equals(RIGHT_BRACKETS)) {
+                    symbolStack.push(string);
                 }
             }
         }
+        //剩下的符号都推进栈里面
         while (!symbolStack.isEmpty()) {
             push(symbolStack.pop(), nodeStack);
         }
         return nodeStack.pop();
     }
 
+    /**构造一个符号node推入栈
+     * @param symbol 符号
+     * @param nodeStack 栈
+     */
     private void push(String symbol, Stack<Node> nodeStack) {
 
         if (!symbol.equals(LEFT_BRACKETS)) {
@@ -142,17 +181,33 @@ public class Expression implements Cloneable {
     }
 
 
+    /**
+     * 是否可以入栈
+     * @param s 准备入栈的复发
+     * @param target 栈顶符号元素
+     * @return true 能入栈 ，false 不能入栈
+     */
     private boolean tryPush(String s, String target) {
         return s.equals(LEFT_BRACKETS) || (isTwo(s) && isOne(target)) ||
                 (!s.equals(RIGHT_BRACKETS) && target.equals(LEFT_BRACKETS));
     }
 
+    /**
+     * 是否是符号
+     * @param s s
+     * @return boolean
+     */
     private boolean isSymbol(String s) {
         return s.equals(ADD) || s.equals(SUBTRACT) || s.equals(MULTIPLY) || s.equals(DIVIDE)
                 || s.equals(LEFT_BRACKETS) || s.equals(RIGHT_BRACKETS);
     }
 
 
+    /**
+     * 随机生成一个分数
+     * @param bound 范围
+     * @return 分数
+     */
     private Fraction createFraction(int bound) {
         if (bound == 1) {
             return new Fraction(0, 1);
@@ -175,6 +230,13 @@ public class Expression implements Cloneable {
         }
     }
 
+    /**
+     * 计算
+     * @param symbol 符号
+     * @param left left
+     * @param right right
+     * @return result
+     */
     private Fraction calculate(String symbol, Fraction left, Fraction right) {
         switch (symbol) {
             case ADD:
@@ -202,6 +264,9 @@ public class Expression implements Cloneable {
         return print(root);
     }
 
+    /**
+     * @return 表达式结果
+     */
     public String getResult() {
         if (root == null) {
             return "";
@@ -210,6 +275,10 @@ public class Expression implements Cloneable {
         }
     }
 
+    /**
+     * @param node 中序打印root
+     * @return tree
+     */
     private String print(Node node) {
         if (node == null) {
             return "";
@@ -252,12 +321,24 @@ public class Expression implements Cloneable {
 
     static class Node implements Cloneable {
 
+        /**
+         * 结果
+         */
         Fraction result;
 
+        /**
+         * 右孩子
+         */
         Node right;
 
+        /**
+         * 左孩子
+         */
         Node left;
 
+        /**
+         * 树高
+         */
         int high;
 
         Node(Fraction result, Node right, Node left, int high) {

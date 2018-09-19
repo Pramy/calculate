@@ -78,6 +78,10 @@ public class ExpressionTest {
         }
     }
 
+    public static void main(String[] args) {
+        new Expression("1 ＋ 2 × 3 ÷ ( 5 - 4 ) ＋ 6").before();
+    }
+
 
     private void change(Expression expression) {
         Field field;
