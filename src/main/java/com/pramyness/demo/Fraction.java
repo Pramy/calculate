@@ -51,7 +51,7 @@ public class Fraction {
         a = Math.abs(a);
         b = Math.abs(b);
         int c = gcd(a, b);
-//        //保证只有a才会小于0
+        //保证只有a才会小于0
         this.a = a / c * isNegative;
         this.b = b / c;
     }
