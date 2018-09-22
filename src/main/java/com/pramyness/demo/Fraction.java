@@ -35,33 +35,32 @@ public class Fraction {
             a = Integer.valueOf(string);
             b = 1;
         }
-        adjust(a,b);
+        adjust(a, b);
     }
 
     public Fraction(int a, int b) {
-        adjust(a,b);
+        adjust(a, b);
     }
 
     private void adjust(int a, int b) {
         if (b == 0) {
             throw new RuntimeException("分母不能为0");
         }
+        int isNegative = a * b < 0 ? -1 : 1;
         //记录负数的标志
-        boolean isNegative = false;
-        if ((a < 0 && b > 0) || (a > 0 && b < 0)) {
-            isNegative = true;
-        }
+
         a = Math.abs(a);
         b = Math.abs(b);
         int c = gcd(a, b);
         //保证只有a才会小于0
-        this.a = isNegative ? -a / c : a / c;
+        this.a = a / c * isNegative;
         this.b = b / c;
     }
 
 
     /**
      * 加法 a + b
+     *
      * @param fraction b
      * @return a - b
      */
@@ -72,6 +71,7 @@ public class Fraction {
 
     /**
      * 减法 a - b
+     *
      * @param fraction b
      * @return a - b
      */
@@ -80,7 +80,9 @@ public class Fraction {
                 this.b * fraction.b);
     }
 
-    /** 乘法 a x b
+    /**
+     * 乘法 a x b
+     *
      * @param fraction b
      * @return a x b
      */
@@ -89,7 +91,9 @@ public class Fraction {
                 this.b * fraction.b);
     }
 
-    /** 除法 a / b
+    /**
+     * 除法 a / b
+     *
      * @param fraction b
      * @return a / b
      */
@@ -105,7 +109,9 @@ public class Fraction {
         this.b = Math.abs(this.b);
     }
 
-    /**是否是负数
+    /**
+     * 是否是负数
+     *
      * @return a < 0
      */
     public boolean isNegative() {
