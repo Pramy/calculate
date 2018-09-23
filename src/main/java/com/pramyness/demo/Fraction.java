@@ -47,7 +47,7 @@ public class Fraction {
             throw new RuntimeException("分母不能为0");
         }
         //记录负数的标志
-        int isNegative = (a ^ b) >> 31 == 1 ? -1 : 1;
+        int isNegative = (a ^ b) >>> 31 == 1 ? -1 : 1;
         a = Math.abs(a);
         b = Math.abs(b);
         int c = gcd(a, b);
